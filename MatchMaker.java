@@ -14,12 +14,12 @@ public class MatchMaker implements Callable<Socket>{
     Player 2 (Receiver): Receives UDP packet on broadcast port containing TCP connection port.
     Establishes connection over TCP by sending a TCP packet to opponent using port received in UDP packet.
      */
-    InetAddress broadcast_address;
-    int broadcast_port;
-    int tcp_port;
+    final InetAddress broadcast_address;
+    final int broadcast_port;
+    final int tcp_port;
 
-    int milliseconds_between_broadcasts = 5000;
-    String new_game_message = "NEW GAME";
+    final int milliseconds_between_broadcasts = 5000;
+    final String new_game_message = "NEW GAME";
 
     // Variable to track who goes first
     // 1 -> Player 1: Goes first

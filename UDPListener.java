@@ -8,9 +8,9 @@ import java.util.concurrent.*;
 public class UDPListener implements Callable<DatagramPacket> {    
     DatagramSocket udp_socket;
 
-    InetAddress broadcast_address;
-    int broadcast_port;
-    String new_game_message;
+    final InetAddress broadcast_address;
+    final int broadcast_port;
+    final String new_game_message;
 
 
     UDPListener(InetAddress broadcast_address, int broadcast_port, String new_game_message){

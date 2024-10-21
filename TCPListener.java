@@ -9,8 +9,8 @@ import java.util.concurrent.Callable;
 public class TCPListener implements Callable<Socket>{
     ServerSocket server_socket;
 
-    InetAddress host_address;
-    int tcp_port;
+    final InetAddress host_address;
+    final int tcp_port;
 
 
     TCPListener(int tcp_port) throws UnknownHostException{

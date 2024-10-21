@@ -10,14 +10,14 @@ import java.util.concurrent.*;
 // Establishes connection with opponent. Blocks until connection is made and prompts terminal input for game moves
 public class GameMaster {
     // TCP socket and helper objects to communicate game commands
-    Socket game_socket;
-    PrintWriter game_socket_out;
-    BufferedReader game_socket_in;
+    final Socket game_socket;
+    final PrintWriter game_socket_out;
+    final BufferedReader game_socket_in;
 
     // Matchmaker to find and establish game_socket connection using UDP and TCP
-    MatchMaker match_maker;
+    final MatchMaker match_maker;
     // To manage the game and its logic
-    ConnectFour connect_four;
+    final ConnectFour connect_four;
 
     // Variable to track of this player (does not change)
     // 1 -> Player 1: Goes first

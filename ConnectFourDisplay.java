@@ -3,7 +3,7 @@ import java.util.*;
 
 // To display connect 4 board to terminal
 public class ConnectFourDisplay {
-    ArrayList<ArrayList<Node>> board;
+    final ArrayList<ArrayList<Node>> board;
 
     final int rows;
     final int columns;

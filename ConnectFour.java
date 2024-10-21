@@ -18,7 +18,7 @@ public class ConnectFour {
 
     // Objects to store current game state and display it to terminal
     ArrayList<ArrayList<Node>> game_state;
-    ConnectFourDisplay board_display;
+    final ConnectFourDisplay board_display;
 
     // For user input
     Scanner scanner = new Scanner(System.in);

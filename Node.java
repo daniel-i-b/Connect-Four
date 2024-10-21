@@ -1,13 +1,12 @@
 
 
 public class Node {
-    // 0 -> x
-    // 1 -> o
+    // 1 -> x (Player 1)
+    // 2 -> o (Player 2)
     int state = -1;
-    int index;
+    final int index;
 
     Node(int index) {
         this.index = index;
-        // this.state = new Random().nextInt(4) -1;
     }
 }

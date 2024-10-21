@@ -3,7 +3,6 @@ import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
@@ -17,8 +16,6 @@ public class Client {
 
     static InetAddress broadcast_address;
     static int broadcast_port;
-
-
 
 
     public static void main(String[] args) throws IOException {
@@ -39,28 +36,6 @@ public class Client {
 
         GameMaster gameMaster = new GameMaster(broadcast_address, broadcast_port);
         gameMaster.start();
-    }
-
-
-
-
-
-    // Utility function for finding all network interfaces
-    public static void find_interfaces() {
-        try{
-            Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-            for(NetworkInterface netint : Collections.list(nets)) {
-                System.out.println("Display name: " + netint.getDisplayName());
-                Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-                for (InetAddress inetAddress : Collections.list(inetAddresses)) {
-                    System.out.println("InetAddress: " + inetAddress.toString());
-                }
-                System.out.println("\n");
-            }
-        }
-        catch(SocketException e) {
-            e.printStackTrace();
-        }
     }
 
 
