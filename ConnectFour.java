@@ -80,6 +80,7 @@ public class ConnectFour {
 
                 if (inserted_node == null) {
                     System.out.println("Invalid input; column is fully occupied.");
+                    continue;
                 }
                 // Print updated board
                 System.out.println(board_display.toString());
