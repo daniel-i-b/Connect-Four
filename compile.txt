@@ -5,7 +5,4 @@ MatchMaker.java
 UDPListener.java
 TCPListener.java
 GameMaster.java
-ServerTest.java
-TestClient.java
-FindBroadcasts.java
 Client.java
