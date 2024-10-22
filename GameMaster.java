@@ -27,6 +27,7 @@ public class GameMaster {
     final String insert_command = "INSERT";
     final String win_command = "YOU WIN";
     final String error_command = "ERROR";
+    final String l_message = new LDisplay().toString();
 
     final int column_base = 0;
 
@@ -109,6 +110,10 @@ public class GameMaster {
                     System.out.println(connect_four.toString());
                     System.out.println("You lose!");
                     send_message(win_command);
+
+                    // Print L
+                    System.out.println(l_message);
+
                     System.out.println("Exiting...");
                     System.exit(0);
 
