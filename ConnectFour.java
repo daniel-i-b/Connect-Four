@@ -21,7 +21,10 @@ public class ConnectFour {
     final ConnectFourDisplay board_display;
 
     // For user input
-    Scanner scanner = new Scanner(System.in);
+    final Scanner scanner = new Scanner(System.in);
+    // To play music
+    final MusicPlayer music_player = new MusicPlayer();
+
     
 
     ConnectFour(int client_player, int column_base){
@@ -59,47 +62,41 @@ public class ConnectFour {
             System.out.println("TIE! No game spaces remaining.");
             return -1;
         }
-
+        // Play jeopardy theme while client is chosing column
+        music_player.start(music_player.jeopardy_theme_file_path, true);
         // Loop until valid input is received
         while (true) {
             System.out.println("Enter column index: ");
             String next_line = scanner.nextLine();
+            int column_index;
 
             try {
                 // Attempt to parse to int
-                int column_index = Integer.parseInt(next_line);
-
-                // Check if input is within column bounds
-                if (column_index < 0 + column_base || column_index >= columns + column_base) {
-                    System.out.println("Invalid input; column index out of bounds. Received: " + column_index);
-                    continue;
-                }
-
-                // Insert node
-                Node inserted_node = insert(column_index, client_player);
-
-                if (inserted_node == null) {
-                    System.out.println("Invalid input; column is fully occupied.");
-                    continue;
-                }
-                // Print updated board
-                System.out.println(board_display.toString());
-
-                // Check to see if won (still need YOU WIN from opponent to exit)
-                if (has_won(inserted_node)) {
-                    System.out.println("You win! Waiting for opponent confirmation...");
-                }
-                else {
-                    System.out.println("Successfully inserted node at index: " + column_index);
-                }
-            
-                // Return inserted column index
-                return column_index;
+                column_index = Integer.parseInt(next_line);
             }
             catch (NumberFormatException e) {
                 System.out.println("Invalid input; expected an integer. Received: " + next_line);
                 continue;
             }
+            // Attempt to insert node
+            Node inserted_node = insert_node(column_index, client_player);
+            // If node is not within column bounds or column is full
+            if (inserted_node == null) {
+                System.out.println("Invalid input; column index out of bounds or column is fully occupied. Received: " + column_index);
+                continue;
+            }
+            // Print updated board
+            System.out.println(board_display.toString());
+            System.out.println("Successfully inserted node at index: " + column_index);
+
+            // Check to see if client won (still need YOU WIN from opponent to exit)
+            if (has_won(inserted_node)) {
+                System.out.println("You win! Waiting for opponent confirmation...");
+            }
+            // Pause music once client has given valid input
+            music_player.pause();
+            // Return inserted column index
+            return column_index;
         }
     }
 
@@ -107,7 +104,7 @@ public class ConnectFour {
     // Inserts opponent node at column index
     // Returns successfully placed column index, -1 for if opponent won, or -2 if invalid
     public int opponent_insert(int column_index) {
-        Node inserted_node = insert(column_index, opponent_player);
+        Node inserted_node = insert_node(column_index, opponent_player);
 
         // Opponent sent invalid index
         if (inserted_node == null) {
@@ -136,10 +133,9 @@ public class ConnectFour {
 
 
     // Insert node at column index. Returns inserted node if successful, null if unsuccessful
-    // Assuming base 0 column index
-    public Node insert(int column_index, int target_player) {
-        // If column index is not valid
-        if (column_index >= columns + column_base) {
+    public Node insert_node(int column_index, int target_player) {
+        // If column index is not in bounds
+        if (column_index < 0 + column_base || column_index >= columns + column_base) {
             return null;
         }
         // Target node is the top node in target column

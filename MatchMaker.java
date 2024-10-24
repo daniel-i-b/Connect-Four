@@ -16,35 +16,33 @@ public class MatchMaker implements Callable<Socket>{
      */
     final InetAddress broadcast_address;
     final int broadcast_port;
-    final int tcp_port;
+    final int tcp_port = new Random().nextInt(100) + 9000;
 
     final int milliseconds_between_broadcasts = 5000;
     final String new_game_message = "NEW GAME";
 
+    // Create executor to create and manage threads
+    final ExecutorService executor = Executors.newCachedThreadPool();
+    final UDPListener udp_listener;
+    final TCPListener tcp_listener;
+
     // Variable to track who goes first
     // 1 -> Player 1: Goes first
     // 2 -> Player 2: Takes the L
-    int player;
+    int client_player;
 
 
-    MatchMaker(InetAddress broadcast_address, int broadcast_port) {
+    MatchMaker(InetAddress broadcast_address, int broadcast_port) throws UnknownHostException {
         this.broadcast_address = broadcast_address;
         this.broadcast_port = broadcast_port;
 
-        // Get random tcp port between 9000 - 9100
-        this.tcp_port = new Random().nextInt(100) + 9000;
+        this.udp_listener = new UDPListener(broadcast_address, broadcast_port, new_game_message);
+        this.tcp_listener = new TCPListener(tcp_port);
     }
 
 
     @Override
     public Socket call() throws Exception {
-        // Create executor to create and manage threads
-        ExecutorService executor = Executors.newCachedThreadPool();
-
-        // Create threads objects
-        UDPListener udp_listener = new UDPListener(broadcast_address, broadcast_port, new_game_message);
-        TCPListener tcp_listener = new TCPListener(tcp_port);
-
         // Start threads
         Future<DatagramPacket> udp_listener_task = executor.submit(udp_listener);
         Future<Socket> tcp_listener_task = executor.submit(tcp_listener);
@@ -56,34 +54,35 @@ public class MatchMaker implements Callable<Socket>{
         while(true) {
             // Player 2 Scenario - found opponent broadcast
             if (udp_listener_task.isDone()) {
-                // Get UDP packet containing TCP port
-                DatagramPacket opponent_packet = udp_listener_task.get();
-                // Terminate other matchmaker threads
+                // Must terminate TCP listener as it binds to the client address as does the to be created Socket
                 tcp_listener.stop();
-                executor.shutdownNow();
+                // Get UDP packet containing TCP port
+                Socket new_socket = get_socket_from_udp_broadcast(udp_listener_task.get());
+                // Close UDP listener (to force it to unbind from socket)
+                udp_listener.stop();
 
-                // Get port from message
-                String received_message = new String(opponent_packet.getData(), 0, opponent_packet.getLength());
-                int opponent_port = Integer.parseInt(received_message.split(":")[1]);
-
-                System.out.println("\nCreating new socket connection: " + opponent_packet.getAddress().getHostAddress() +
-                    "\t" + opponent_port);
-
+                // If UDP packet didn't contain a valid format message or port number
+                if (new_socket == null) {
+                     // Start up UDP and TCP listeners again 
+                    udp_listener_task = executor.submit(udp_listener);
+                    tcp_listener_task = executor.submit(tcp_listener);
+                    continue;
+                }
                 // Set player variable
-                player = 2;
-                // Create new socket connected to the opponent address and port, and binded to this local address and port.
-                return new Socket(opponent_packet.getAddress(), opponent_port, InetAddress.getLocalHost(), tcp_port);
+                client_player = 2;
+                
+                return new_socket;
             }
             // Player 1 Scenario - opponent responded to broadcast
             else if (tcp_listener_task.isDone()) {
                 // Get TCP socket 
                 Socket socket = tcp_listener_task.get();
-                // Terminate other matchmaker threads
+                // Terminate other matchmaker threads (to force them to unbind from socket)
                 udp_listener.stop();
-                executor.shutdownNow();
-                
+                tcp_listener.stop();
+
                 // Set player variable
-                player = 1;
+                client_player = 1;
                 // Return socket
                 return socket;
             }
@@ -98,8 +97,29 @@ public class MatchMaker implements Callable<Socket>{
                 // Update time
                 start_time = System.currentTimeMillis();
             }
-            
         }
+    }
+
+
+    // Attempts to build socket from datagram. If it does not contain a format or valid int as port, returns null
+    public Socket get_socket_from_udp_broadcast(DatagramPacket opponent_packet) throws IOException {
+        String received_message = new String(opponent_packet.getData(), 0, opponent_packet.getLength());
+        int opponent_port;
+        try {
+            // Get port from message
+            opponent_port = Integer.parseInt(received_message.split(":")[1]);
+        }
+        // Not valid format
+        catch (Exception e) {
+            System.out.println("New game message did not contain a valid format; expected " + new_game_message +
+                ": followed by an integer. Received: " + received_message);
+            return null;
+        }
+        System.out.println("\nCreating new socket connection: " + opponent_packet.getAddress().getHostAddress() +
+            "\t" + opponent_port);
+
+        // Create new socket connected to the opponent address and port, and binded to this local address and port.
+        return new Socket(opponent_packet.getAddress(), opponent_port, InetAddress.getLocalHost(), tcp_port);
     }
 
 

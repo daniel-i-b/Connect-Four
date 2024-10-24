@@ -1,3 +1,16 @@
+/* 
++ --- +
+|     |
+|     |
+|     |
+|     |
+|     |
+|     |
+|     + ---- +
+|            |
++ --- + ---- +
+*/
+
 public class LDisplay {
 
     final int l_girth = 5;

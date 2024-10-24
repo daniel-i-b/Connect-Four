@@ -31,33 +31,21 @@ public class UDPListener implements Callable<DatagramPacket> {
             // udp_socket.bind(new InetSocketAddress(client_port));
             
             while(true) {
+                byte[] receive_data = new byte[1024];
+                DatagramPacket receive_packet = new DatagramPacket(receive_data, receive_data.length);
+
                 try {
-                    byte[] receive_data = new byte[1024];
-                    DatagramPacket receive_packet = new DatagramPacket(receive_data, receive_data.length);
                     // Receive packet from client (blocks on receive())
                     udp_socket.receive(receive_packet);
-
-                    // Get message
-                    String received_message = new String(receive_packet.getData(), 0, receive_packet.getLength());
-
-                    // Check if packet contains new game message
-                    if (new_game_message.equals(received_message.split(":")[0])) {
-                        System.out.println("\nUDPListener: Found new game request: " + received_message + "\nAddress: " +
-                            receive_packet.getAddress().getHostAddress() + "\tPort: " + receive_packet.getPort());
-
-                        // Close socket and return packet
-                        stop();
-                        return receive_packet;
-                    }
-                    System.out.println(
-                        "UDPListener: Received unknown request: " + received_message +
-                        "\nAddress: " + receive_packet.getAddress().getHostAddress() + "\tPort: " + receive_packet.getPort()
-                    );
                 }
                 catch (SocketException e) {
                     // When receive is unblocked, this exception is thrown
                     System.out.println("UDPListener has been stopped.");
                     return null;
+                }
+
+                if (contains_new_game_message(receive_packet)) {
+                    return receive_packet;
                 }
             }
         }
@@ -66,7 +54,6 @@ public class UDPListener implements Callable<DatagramPacket> {
                 "\t" + broadcast_port);
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -78,4 +65,26 @@ public class UDPListener implements Callable<DatagramPacket> {
         }
     }
 
+
+    // Checks if packet contains new game message
+    public boolean contains_new_game_message(DatagramPacket receive_packet) {
+        // Get message
+        String received_message = new String(receive_packet.getData(), 0, receive_packet.getLength());
+
+        try {
+            // Check if packet contains new game message
+            if (new_game_message.equals(received_message.split(":")[0])) {
+                System.out.println("\nUDPListener: Found new game request: " + received_message + "\nAddress: " +
+                    receive_packet.getAddress().getHostAddress() + "\tPort: " + receive_packet.getPort());
+                return true;
+            }
+        }
+        // If message isn't formatted correctly or doesn't contain new game message
+        catch (Exception e) {}
+
+        System.out.println(
+            "UDPListener: Received unknown request: " + received_message +
+            "\nAddress: " + receive_packet.getAddress().getHostAddress() + "\tPort: " + receive_packet.getPort());
+        return false;
+    }
 }
