@@ -31,7 +31,7 @@ public class GameMaster {
     final String l_message = new LDisplay().toString();
 
     // Variable to change the INSERT column base since spec doesn't specify 
-    final int column_base = 0;
+    final int column_base = 1;
     
 
 
@@ -69,15 +69,34 @@ public class GameMaster {
 
 
     public void start() throws IOException {
+        int current_player;
+
         System.out.println(connect_four.start_message());
 
         // Go first
         if (client_player == 1) {
+            current_player = 1;
+
             clients_turn();
         }
         else {
+            current_player = 2;
+
             System.out.println(connect_four.toString());
             opponents_turn();
+        }
+
+        while(true) {
+            // If current_player is 1, then 3 - 1 = 2
+            // If current_player is 2, then 3 - 2 = 1
+            current_player = 3 - current_player;
+
+            if (current_player == 1){
+                 clients_turn();
+            }
+            else {
+                opponents_turn();
+            }
         }
     }
 
@@ -90,10 +109,7 @@ public class GameMaster {
             send_message(error_command);
             System.exit(0);
         }
-        
         send_message(insert_command + ":" + response);
-        // Keep looping until something happens
-        opponents_turn();
     }
 
 
@@ -156,9 +172,6 @@ public class GameMaster {
                 System.out.println("Exiting...");
                 System.exit(0);
         }
-
-        // Loop until something happens
-        clients_turn();
     }
 
 

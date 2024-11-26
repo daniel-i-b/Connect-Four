@@ -8,17 +8,16 @@ import java.util.concurrent.*;
 public class UDPListener implements Callable<DatagramPacket> {    
     DatagramSocket udp_socket;
 
-    final InetAddress broadcast_address;
     final int broadcast_port;
     final String new_game_message;
 
 
-    UDPListener(InetAddress broadcast_address, int broadcast_port, String new_game_message){
-        this.broadcast_address = broadcast_address;
+    UDPListener(int broadcast_port, String new_game_message){
         this.broadcast_port = broadcast_port;
         this.new_game_message = new_game_message;
     }
 
+    
     @Override
     public DatagramPacket call() throws Exception {
         // System.out.println("UDPListener: Listening on address: " + broadcast_address.getHostAddress() + "\tPort: " + broadcast_port);
@@ -26,9 +25,9 @@ public class UDPListener implements Callable<DatagramPacket> {
 
         try {
             // Need to reuse address when testing two promgram instances on same machine
-            udp_socket = new DatagramSocket(broadcast_port);
-            // udp_socket.setReuseAddress(true);
-            // udp_socket.bind(new InetSocketAddress(client_port));
+            udp_socket = new DatagramSocket(null);
+            udp_socket.setReuseAddress(true);
+            udp_socket.bind(new InetSocketAddress(broadcast_port));
             
             while(true) {
                 byte[] receive_data = new byte[1024];
@@ -50,8 +49,8 @@ public class UDPListener implements Callable<DatagramPacket> {
             }
         }
         catch (Exception e){
-            System.out.println("UDPListener could not bind to the given address and port: " + broadcast_address.getHostAddress() +
-                "\t" + broadcast_port);
+            System.out.println("UDPListener could not bind to the given address and port: " +
+                broadcast_port);
             e.printStackTrace();
         }
         return null;

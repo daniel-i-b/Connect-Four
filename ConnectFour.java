@@ -62,8 +62,12 @@ public class ConnectFour {
             System.out.println("TIE! No game spaces remaining.");
             return -1;
         }
+
         // Play jeopardy theme while client is chosing column
-        music_player.start(music_player.jeopardy_theme_file_path, true);
+        if (client_player == 1) {
+            music_player.start(music_player.jeopardy_theme_file_path, true);
+        }
+
         // Loop until valid input is received
         while (true) {
             System.out.println("Enter column index: ");
@@ -94,7 +98,10 @@ public class ConnectFour {
                 System.out.println("You win! Waiting for opponent confirmation...");
             }
             // Pause music once client has given valid input
-            music_player.pause();
+            if (client_player == 1) {
+                music_player.pause();
+            }
+            
             // Return inserted column index
             return column_index;
         }

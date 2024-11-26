@@ -8,23 +8,20 @@ import java.util.concurrent.Callable;
 // Calling stop() will halt this thread.
 public class TCPListener implements Callable<Socket>{
     ServerSocket server_socket;
-
-    final InetAddress host_address;
     final int tcp_port;
 
 
     TCPListener(int tcp_port) throws UnknownHostException{
-        this.host_address = InetAddress.getLocalHost();
         this.tcp_port = tcp_port;
     }
 
 
     @Override
     public Socket call() throws Exception {
-        System.out.println("TCPListener: Listening on address: " + host_address.getHostAddress() + "\tPort: " + tcp_port);
+        System.out.println("TCPListener: Listening on local address and port: " + tcp_port);
         try{
             // Initialise server socket and get new socket
-            server_socket = new ServerSocket(tcp_port, 1, host_address);
+            server_socket = new ServerSocket(tcp_port);
             Socket new_socket = server_socket.accept();   
               
             System.out.println("\nTCPListener: Received new game reply.\nAddress: " +
@@ -39,7 +36,7 @@ public class TCPListener implements Callable<Socket>{
             return null;
         }
         catch(Exception e) {
-            System.out.println("TCPListener could not bind to the given address and port: " + host_address.getHostAddress() + "\t" + tcp_port);
+            System.out.println("TCPListener could not bind to the given address and port: " + tcp_port);
             e.printStackTrace();
         }
         return null;

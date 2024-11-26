@@ -18,7 +18,7 @@ public class MatchMaker implements Callable<Socket>{
     final int broadcast_port;
     final int tcp_port = new Random().nextInt(100) + 9000;
 
-    final int milliseconds_between_broadcasts = 5000;
+    final int milliseconds_between_broadcasts = 10000;
     final String new_game_message = "NEW GAME";
 
     // Create executor to create and manage threads
@@ -36,7 +36,7 @@ public class MatchMaker implements Callable<Socket>{
         this.broadcast_address = broadcast_address;
         this.broadcast_port = broadcast_port;
 
-        this.udp_listener = new UDPListener(broadcast_address, broadcast_port, new_game_message);
+        this.udp_listener = new UDPListener(broadcast_port, new_game_message);
         this.tcp_listener = new TCPListener(tcp_port);
     }
 
@@ -86,8 +86,9 @@ public class MatchMaker implements Callable<Socket>{
                 // Return socket
                 return socket;
             }
+
             // Send broadcast if (milliseconds_between_broadcasts) has passed
-            else if (System.currentTimeMillis() - start_time > this.milliseconds_between_broadcasts) {
+            if (System.currentTimeMillis() - start_time > this.milliseconds_between_broadcasts) {
                 // Must close UDP listening thread to send UDP broadcast, otherwise this client will connect with itself
                 udp_listener.stop();
                 // Send out broadcast
@@ -119,7 +120,7 @@ public class MatchMaker implements Callable<Socket>{
             "\t" + opponent_port);
 
         // Create new socket connected to the opponent address and port, and binded to this local address and port.
-        return new Socket(opponent_packet.getAddress(), opponent_port, InetAddress.getLocalHost(), tcp_port);
+        return new Socket(opponent_packet.getAddress(), opponent_port);
     }
 
 
@@ -128,7 +129,7 @@ public class MatchMaker implements Callable<Socket>{
         System.out.println("\nBroadcasting new game with TCP port: " + tcp_port +
             "\nAddress: " + broadcast_address.getHostAddress() + "\tPort: " + broadcast_port);
         
-        try (DatagramSocket send_socket = new DatagramSocket(broadcast_port)) {
+        try (DatagramSocket send_socket = new DatagramSocket()) {
             // Initialise and send payload to broadcast address
             byte[] sendData = (new_game_message + ":" + tcp_port).getBytes();
             DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, broadcast_address, broadcast_port);

@@ -42,7 +42,8 @@ public class Client {
             }
             // If connection cannot be made or is interrupted
             catch (IOException e) {
-                System.out.println("\n-- CONNECTION WAS INTERRUPTED --\nReturning to matchmaking...");                continue;
+                System.out.println("\n-- CONNECTION WAS INTERRUPTED --\nReturning to matchmaking...");                
+                continue;
             }
         }
     }
